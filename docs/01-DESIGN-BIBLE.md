@@ -1,300 +1,429 @@
-# UI BIBLE — LIFE OS
+# UI BIBLE — LIFE OS (Apex Velocity)
 
 > Guia definitivo de design do sistema. Todo componente, página e interação deve seguir estas diretrizes. Inconsistência visual é um bug.
 
 ---
 
-## FILOSOFIA DE DESIGN
+## BRAND & PERSONALIDADE
 
-O design do Life OS comunica:
+O Life OS usa o sistema de design **Apex Velocity** — uma estética de alta performance e precisão de engenharia voltada para power users.
 
-- **Controle** — o usuário sente que domina sua vida
-- **Velocidade** — tudo responde imediatamente
-- **Clareza** — nunca confuso, nunca sobrecarregado
-- **Premium** — parece caro, cuida dos detalhes
+**Personalidade:** agressivo, porém disciplinado. Urgência, controle e artesanato premium.
 
-Referências primárias: **Linear**, **Raycast**, **Arc**, **Vercel**, **Superhuman**
+**Estilo visual:** fusão de *Modern Corporate* com *Dark Tech Minimalism*. Pense num cockpit de alta performance: cada elemento é funcional, cada transição é rápida, a hierarquia é absoluta.
+
+**Referências:** Linear, Raycast, Vercel, cockpits aeronáuticos, interfaces de F1.
 
 ---
 
 ## SISTEMA DE CORES
 
-### Paleta Base (Dark Mode — padrão)
+### Tokens Completos (Dark Mode — padrão)
 
 ```css
-/* Backgrounds */
---bg-base:        #0a0a0a;   /* fundo raiz da aplicação */
---bg-surface:     #111111;   /* cards, painéis, sidebars */
---bg-elevated:    #1a1a1a;   /* modais, dropdowns, tooltips */
---bg-overlay:     #222222;   /* hover states, seleções */
+/* Surfaces */
+--surface:                   #131313;
+--surface-dim:               #131313;
+--surface-bright:            #3a3939;
+--surface-container-lowest:  #0e0e0e;  /* base canvas / bg raiz */
+--surface-container-low:     #1c1b1b;  /* sidebar, painéis */
+--surface-container:         #201f1f;  /* cards nível 1 */
+--surface-container-high:    #2a2a2a;  /* modais, popovers */
+--surface-container-highest: #353534;  /* elementos elevados */
+
+/* On-Surface */
+--on-surface:         #e5e2e1;  /* texto principal */
+--on-surface-variant: #e6bdb8;  /* texto secundário, metadados */
+
+/* Inverse */
+--inverse-surface:    #e5e2e1;
+--inverse-on-surface: #313030;
 
 /* Borders */
---border-subtle:  #1f1f1f;   /* separadores sutis */
---border-default: #2a2a2a;   /* bordas de componentes */
---border-strong:  #3a3a3a;   /* bordas em foco */
+--outline:         #ac8884;  /* bordas visíveis */
+--outline-variant: #5c403c;  /* bordas sutis */
 
-/* Text */
---text-primary:   #efefef;   /* título, conteúdo principal */
---text-secondary: #888888;   /* labels, metadados */
---text-tertiary:  #555555;   /* placeholders, desabilitados */
---text-inverse:   #0a0a0a;   /* texto em fundos claros */
+/* Background */
+--background:    #131313;
+--on-background: #e5e2e1;
 
-/* Brand */
---brand-primary:  #6366f1;   /* indigo-500 — cor principal */
---brand-hover:    #4f46e5;   /* indigo-600 — hover */
---brand-subtle:   #1e1b4b;   /* indigo-950 — fundo sutil */
---brand-glow:     rgba(99,102,241,0.15); /* glow suave */
-
-/* Status */
---success:        #22c55e;   /* verde */
---warning:        #f59e0b;   /* âmbar */
---danger:         #ef4444;   /* vermelho */
---info:           #3b82f6;   /* azul */
-
-/* Status (backgrounds sutis) */
---success-subtle: rgba(34,197,94,0.1);
---warning-subtle: rgba(245,158,11,0.1);
---danger-subtle:  rgba(239,68,68,0.1);
---info-subtle:    rgba(59,130,246,0.1);
+/* Surface Variant */
+--surface-variant: #353534;
 ```
 
-### Paleta Light Mode (secundária)
+### Cor Primária — Apex Red
 
 ```css
---bg-base:        #ffffff;
---bg-surface:     #f8f8f8;
---bg-elevated:    #f0f0f0;
---bg-overlay:     #e8e8e8;
---border-subtle:  #ececec;
---border-default: #e0e0e0;
---text-primary:   #0a0a0a;
---text-secondary: #666666;
---text-tertiary:  #aaaaaa;
+/* Primary */
+--primary:           #ffb4ab;  /* texto em fundos escuros */
+--on-primary:        #690005;
+--primary-container: #dc2626;  /* ← APEX RED — COR PRINCIPAL */
+--on-primary-container: #fff6f5;
+--inverse-primary:   #bf0715;
+
+/* Primary Fixed */
+--primary-fixed:     #ffdad6;
+--primary-fixed-dim: #ffb4ab;
+--on-primary-fixed:  #410002;
+--on-primary-fixed-variant: #93000b;
+
+/* Surface Tint */
+--surface-tint: #ffb4ab;
 ```
+
+### Cores Secundárias
+
+```css
+/* Secondary */
+--secondary:           #c8c6c5;
+--on-secondary:        #303030;
+--secondary-container: #474746;
+--on-secondary-container: #b7b5b4;
+
+/* Secondary Fixed */
+--secondary-fixed:     #e5e2e1;
+--secondary-fixed-dim: #c8c6c5;
+--on-secondary-fixed:  #1b1b1c;
+--on-secondary-fixed-variant: #474746;
+```
+
+### Cores Terciárias
+
+```css
+/* Tertiary */
+--tertiary:           #ccc5c1;
+--on-tertiary:        #33302d;
+--tertiary-container: #76716d;
+--on-tertiary-container: #fef7f2;
+
+/* Tertiary Fixed */
+--tertiary-fixed:     #e8e1dd;
+--tertiary-fixed-dim: #ccc5c1;
+--on-tertiary-fixed:  #1e1b19;
+--on-tertiary-fixed-variant: #4a4643;
+```
+
+### Status / Error
+
+```css
+--error:           #ffb4ab;
+--on-error:        #690005;
+--error-container: #93000a;
+--on-error-container: #ffdad6;
+```
+
+### Referência Rápida — Uso Cotidiano
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--background` | `#131313` | Fundo raiz da aplicação |
+| `--surface-container-low` | `#1c1b1b` | Sidebar, painéis laterais |
+| `--surface-container` | `#201f1f` | Cards padrão |
+| `--surface-container-high` | `#2a2a2a` | Modais, dropdowns |
+| `--on-surface` | `#e5e2e1` | Texto principal |
+| `--on-surface-variant` | `#e6bdb8` | Labels, metadados |
+| `--primary-container` | `#dc2626` | **Apex Red** — ações primárias, estados ativos |
+| `--outline-variant` | `#5c403c` | Bordas sutis de repouso |
+| `--outline` | `#ac8884` | Bordas visíveis, hover |
 
 ### Cores dos Módulos
 
-Cada módulo tem uma cor de identidade para uso em ícones e acentos:
+Módulos usam a cor base do sistema com variações de **accent** para ícones:
 
 ```
-Tarefas       #6366f1  indigo
-Projetos      #8b5cf6  violet
-Agenda        #3b82f6  blue
-Reuniões      #06b6d4  cyan
-WhatsApp      #22c55e  green
-Emails        #f59e0b  amber
-Notas         #eab308  yellow
-Documentos    #f97316  orange
-Hábitos       #ec4899  pink
-Diário        #a855f7  purple
-Saúde         #ef4444  red
-Finanças      #10b981  emerald
-Objetivos     #6366f1  indigo
-IA            #818cf8  indigo-400
+Tarefas       #dc2626  apex-red
+Projetos      #ef4444  red-500
+Agenda        #f97316  orange (destaque)
+Reuniões      #c8c6c5  secondary
+Notas         #ccc5c1  tertiary
+Documentos    #e5e2e1  on-surface
+Hábitos       #ffb4ab  primary
+Finanças      #b7b5b4  secondary-container-on
+Objetivos     #dc2626  apex-red
+IA            #fff6f5  on-primary-container
 ```
 
 ---
 
 ## TIPOGRAFIA
 
-```css
-/* Font Stack */
---font-sans:  'Geist', 'Inter', system-ui, sans-serif;
---font-mono:  'Geist Mono', 'JetBrains Mono', monospace;
+### Fontes
 
-/* Escala Tipográfica */
---text-xs:    11px / 1.4;
---text-sm:    13px / 1.5;
---text-base:  14px / 1.6;   /* padrão da interface */
---text-md:    15px / 1.6;
---text-lg:    17px / 1.4;
---text-xl:    20px / 1.3;
---text-2xl:   24px / 1.25;
---text-3xl:   30px / 1.2;
---text-4xl:   38px / 1.15;
-
-/* Pesos */
---font-normal:  400;
---font-medium:  500;
---font-semibold: 600;
---font-bold:    700;
 ```
+Display / Headings / UI:  Geist       — sans-serif, técnico, legível em densidade alta
+Metadata / Labels / Code: JetBrains Mono — monospaced, reforça o DNA "Life OS técnico"
+```
+
+### Escala
+
+```yaml
+display-lg:
+  font: Geist 700
+  size: 48px / 56px
+  tracking: -0.02em
+
+headline-lg:
+  font: Geist 600
+  size: 32px / 40px
+  tracking: -0.01em
+
+headline-lg-mobile:
+  font: Geist 600
+  size: 24px / 32px
+
+body-md:
+  font: Geist 400
+  size: 16px / 24px
+
+label-sm:
+  font: JetBrains Mono 500
+  size: 12px / 16px
+  tracking: 0.05em    ← uppercase em labels técnicos
+```
+
+### Regras de Uso
+
+- **Títulos de página e seção** → Geist 600-700, tight tracking
+- **Body e descrições** → Geist 400
+- **Status, badges, metadados** → JetBrains Mono uppercase
+- **Código e timestamps** → JetBrains Mono
+- Nunca misturar mais de 2 famílias na mesma tela
 
 ---
 
 ## ESPAÇAMENTO
 
-Sistema baseado em múltiplos de 4px:
+Sistema baseado em grid de **4px**:
 
 ```
-4px   — micro (entre ícone e label)
-8px   — pequeno (padding interno de badge)
-12px  — base (padding de botões pequenos)
-16px  — médio (padding padrão de cards)
-20px  — grande (espaçamento entre seções)
-24px  — xl (padding de painéis)
-32px  — 2xl (margem entre blocos maiores)
-48px  — 3xl (espaçamento de seções de página)
-64px  — 4xl (margens de layout)
+xs:    4px   — entre ícone e label
+sm:    8px   — padding interno de badge, gap em grupos densos
+md:    16px  — padding de cards, gutter mobile
+lg:    24px  — espaçamento entre seções
+xl:    40px  — separação de blocos maiores
+gutter:        16px (mobile) / 32px (desktop)
 ```
 
 ---
 
-## BORDAS E SOMBRAS
+## BORDAS (Border Radius)
+
+O sistema usa bordas **Soft-Industrial** — pequeno arredondamento que suaviza o contraste extremo sem virar "friendly". **Nunca pill-shape em botões ou inputs.**
+
+```
+sm:      2px   (0.125rem)
+DEFAULT: 4px   (0.25rem)   ← padrão da maioria dos componentes
+md:      6px   (0.375rem)
+lg:      8px   (0.5rem)    ← cards externos, containers grandes
+xl:      12px  (0.75rem)   ← modais, sheets
+full:    9999px             ← avatares circulares SOMENTE
+```
+
+---
+
+## ELEVAÇÃO E PROFUNDIDADE
+
+Profundidade via **Tonal Layering** + **Subtle Outlines**. Sem `box-shadow` clássico.
+
+| Nível | Background | Borda | Uso |
+|---|---|---|---|
+| 0 — Canvas | `#0e0e0e` | — | Fundo raiz |
+| 1 — Cards / Sidebar | `#1c1b1b` | `1px #262626` | Painéis, cards base |
+| 2 — Modais / Popovers | `#2a2a2a` | `1px #5c403c` + glow vermelho 10% | Camada ativa, modais |
+
+### Glow de Atividade (Nível 2)
 
 ```css
-/* Border Radius */
---radius-sm:   4px;
---radius-md:   8px;
---radius-lg:   12px;
---radius-xl:   16px;
---radius-2xl:  20px;
---radius-full: 9999px;
-
-/* Sombras */
---shadow-sm:  0 1px 2px rgba(0,0,0,0.4);
---shadow-md:  0 4px 12px rgba(0,0,0,0.4);
---shadow-lg:  0 8px 24px rgba(0,0,0,0.5);
---shadow-xl:  0 16px 48px rgba(0,0,0,0.6);
-
-/* Glow do brand */
---shadow-brand: 0 0 0 1px var(--brand-primary),
-                0 0 20px var(--brand-glow);
+/* Aplicar em modais e elementos em foco profundo */
+box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.15),
+            0 0 24px rgba(220, 38, 38, 0.08);
 ```
 
 ---
 
-## GLASSMORPHISM
-
-Usar com moderação — apenas em modais flutuantes e Command Bar:
-
-```css
-.glass {
-  background: rgba(17, 17, 17, 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-```
-
----
-
-## COMPONENTES — PADRÕES
+## COMPONENTES
 
 ### Botões
 
 ```
-Primary   — bg brand-primary, texto branco, hover brand-hover
-Secondary — bg bg-elevated, borda border-default, hover bg-overlay
-Ghost     — sem fundo, sem borda, hover bg-overlay
-Danger    — bg danger-subtle, texto danger, hover bg danger com opacity
+Primary
+  background: #dc2626 (Apex Red)
+  color: #ffffff
+  hover: background #ef4444
+  radius: DEFAULT (4px)
+  height: 36px
+  padding: 0 16px
+  font: Geist 500 14px
+
+Secondary
+  background: transparent
+  border: 1px solid #404040
+  color: #e5e2e1
+  hover: border-color #dc2626, color #dc2626
+  radius: DEFAULT (4px)
+
+Ghost
+  background: transparent
+  border: none
+  color: #e5e2e1
+  hover: background #201f1f
+
+Danger / Destructive
+  background: rgba(220,38,38,0.15)
+  color: #ffb4ab
+  hover: background rgba(220,38,38,0.25)
 ```
 
 Tamanhos:
 ```
-sm   — h-7  px-3 text-xs
-md   — h-8  px-3 text-sm   (padrão)
-lg   — h-9  px-4 text-sm
-xl   — h-10 px-5 text-base
+sm:  h-7  px-3  text-xs
+md:  h-9  px-4  text-sm   ← padrão
+lg:  h-10 px-5  text-base
 ```
 
-### Inputs
+### Inputs & Fields
 
 ```css
-height: 32px;
+/* Estado padrão */
+height: 36px;
+background: var(--surface-container);   /* #201f1f */
+border-bottom: 2px solid var(--outline-variant);  /* #5c403c */
+border-top: none;
+border-left: none;
+border-right: none;
+border-radius: var(--radius-DEFAULT) var(--radius-DEFAULT) 0 0;
 padding: 0 12px;
-background: var(--bg-elevated);
-border: 1px solid var(--border-default);
-border-radius: var(--radius-md);
-font-size: 13px;
-color: var(--text-primary);
+font-size: 14px;
+color: var(--on-surface);
+
+/* Label — JetBrains Mono uppercase */
+font-family: 'JetBrains Mono', monospace;
+font-size: 11px;
+font-weight: 500;
+letter-spacing: 0.05em;
+text-transform: uppercase;
+color: var(--on-surface-variant);
 
 /* Focus */
-border-color: var(--brand-primary);
-box-shadow: var(--shadow-brand);
+border-bottom-color: #dc2626;  /* Apex Red */
+border-bottom-width: 2px;
 outline: none;
 ```
 
 ### Cards
 
 ```css
-background: var(--bg-surface);
-border: 1px solid var(--border-subtle);
-border-radius: var(--radius-lg);
+background: var(--surface-container);    /* #201f1f */
+border: 1px solid var(--outline-variant); /* #5c403c */
+border-radius: var(--radius-lg);          /* 8px */
 padding: 16px;
 
-/* Hover interativo */
-&:hover {
-  border-color: var(--border-default);
-  background: var(--bg-elevated);
+/* Hover */
+border-color: var(--outline);  /* #ac8884 */
+
+/* Active / Selected */
+border-color: #dc2626;  /* Apex Red — sem mudar espessura */
+```
+
+### Chips & Tags
+
+```css
+/* Status chip padrão */
+background: rgba(220, 38, 38, 0.15);
+color: #dc2626;
+font-family: 'JetBrains Mono', monospace;
+font-size: 11px;
+font-weight: 500;
+letter-spacing: 0.05em;
+text-transform: uppercase;
+padding: 2px 8px;
+border-radius: var(--radius-DEFAULT);  /* 4px */
+
+/* Variações de status */
+/* success  */ background: rgba(34,197,94,0.12);  color: #4ade80;
+/* warning  */ background: rgba(245,158,11,0.12); color: #fbbf24;
+/* neutral  */ background: var(--surface-container-high); color: var(--on-surface-variant);
+```
+
+### Listas e Navegação
+
+```css
+/* Item de lista padrão */
+height: 36px;
+padding: 0 12px;
+border-radius: var(--radius-DEFAULT);
+
+/* Hover */
+background: var(--surface-container);  /* #201f1f */
+
+/* Active — indicator bar esquerda */
+background: var(--surface-container-high);
+position: relative;
+
+/* Barra vertical Apex Red */
+::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 2px;
+  background: #dc2626;
+  border-radius: 0 2px 2px 0;
 }
 ```
 
-### Badges
+### Command Bar (`⌘K`)
 
-```
-default   — bg bg-elevated, texto secondary
-success   — bg success-subtle, texto success
-warning   — bg warning-subtle, texto warning
-danger    — bg danger-subtle, texto danger
-brand     — bg brand-subtle, texto brand-primary
+```css
+position: fixed;
+top: 20%;
+left: 50%;
+transform: translateX(-50%);
+width: min(640px, 90vw);
+
+background: var(--surface-container-high);   /* #2a2a2a */
+border: 1px solid var(--outline-variant);
+border-radius: var(--radius-xl);              /* 12px */
+box-shadow: 0 0 0 1px rgba(220,38,38,0.15),
+            0 24px 48px rgba(0,0,0,0.7);
+
+/* Input interno */
+height: 52px;
+font-size: 15px;
+padding: 0 20px;
+background: transparent;
+border: none;
+border-bottom: 1px solid var(--outline-variant);
+color: var(--on-surface);
 ```
 
 ---
 
 ## LAYOUT
 
+### Grid
+
+```
+Desktop:  12 colunas, max-width 1280px
+Mobile:   4 colunas
+Gutter:   16px (mobile) / 32px (desktop)
+```
+
 ### Sidebar
 
 ```
-Largura:   240px (expandida) / 56px (colapsada)
-Background: bg-surface
-Border:     border-right 1px border-subtle
-```
-
-Hierarquia da sidebar:
-```
-[Logo / Workspace Switcher]
-─────────────
-[Ações rápidas: Nova tarefa, Capture, Busca]
-─────────────
-[Seções com ícone + label]
-  ↳ Hoje
-  ↳ Inbox
-  ↳ Projetos
-  ↳ ...
-─────────────
-[Seções expansíveis por módulo]
-─────────────
-[Footer: Perfil, Configurações, Plano]
+Largura expandida:  240px
+Largura colapsada:  56px
+Background:         var(--surface-container-low)  #1c1b1b
+Border right:       1px solid var(--outline-variant)
 ```
 
 ### Main Content
 
 ```
-max-width: 860px (conteúdo de documentos)
-max-width: 1200px (dashboards, listagens)
-padding: 24px 32px
-```
-
-### Command Bar (`⌘K`)
-
-```css
-/* Container */
-position: fixed;
-top: 20%;
-left: 50%;
-transform: translateX(-50%);
-width: min(640px, 90vw);
-background: glass;
-border-radius: 16px;
-box-shadow: var(--shadow-xl);
-border: 1px solid var(--border-strong);
-
-/* Input */
-height: 56px;
-font-size: 16px;
-padding: 0 20px;
+max-width: 1280px
+padding:   24px 32px (desktop) / 16px (mobile)
 ```
 
 ---
@@ -302,126 +431,84 @@ padding: 0 20px;
 ## ANIMAÇÕES
 
 ```css
-/* Transições padrão */
+/* Transições */
 --transition-fast:   100ms ease;
 --transition-base:   150ms ease;
---transition-slow:   250ms ease;
---transition-spring: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+--transition-slow:   200ms ease;
 
-/* Regras */
-/* Hover de cor/border:  150ms ease */
-/* Aparecer/desaparecer: 150ms ease (fade) */
-/* Modais e popovers:    200ms spring */
-/* Sidebar:              250ms ease */
-/* Page transitions:     200ms ease */
+/* Regra geral */
+/* Cor, border, opacity: 150ms ease */
+/* Aparição de modais:   200ms ease + translate Y 4px → 0 */
+/* Sidebar:              200ms ease */
+/* Hover de lista:       100ms ease */
 ```
 
 Framer Motion — usar apenas para:
-- Entrada de modais e sheets
-- Drag & drop
-- Animações de lista (layout animations)
-- Micro-interações de feedback (checkbox, like)
+- Entrada de modais e sheets (fade + translateY)
+- Drag & drop de tarefas
+- Layout animations em listas
+- Micro-interações de feedback (checkbox, check de hábito)
 
-**Evitar** animações longas, bouncy excessivo, ou qualquer coisa que atrase uma ação.
+**Proibido:** bouncy excessivo, spring animations longas, qualquer coisa que atrase uma ação do usuário.
 
 ---
 
 ## ÍCONES
 
 - Biblioteca: **Lucide React** (padrão)
-- Tamanhos: 14px (micro), 16px (padrão), 18px (médio), 20px (grande)
-- Stroke width: 1.5px (padrão), 2px (destaque)
-- Cor: sempre herdar da cor do texto pai
+- Tamanhos: 14px (micro), 16px (padrão), 18px (médio)
+- Stroke width: 1.5px
+- Cor: herdar do texto pai; Apex Red apenas em ícones de estado ativo
 
 ---
 
-## DENSIDADE DE INFORMAÇÃO
-
-### Modos de visualização
-
-Toda lista principal deve suportar:
-
-```
-List    — alta densidade, 1 linha por item (padrão)
-Board   — kanban, cards médios
-Grid    — cards maiores, mais visual
-Calendar — view de calendário
-```
-
-### Padrão de linha (modo List)
-
-```
-[checkbox] [ícone] [título principal] ... [meta 1] [meta 2] [assignee] [data]
-height: 36px
-padding: 0 12px
-```
-
----
-
-## PADRÕES DE INTERAÇÃO
-
-### Keyboard First
-
-Toda ação principal tem atalho:
+## ATALHOS DE TECLADO
 
 ```
 ⌘K          — Command Bar (global)
-⌘N          — Nova tarefa/item contextual
-⌘/          — Ajuda de atalhos
+⌘N          — Novo item contextual
+⌘/          — Painel de atalhos
 ⌘,          — Configurações
-⌘[          — Voltar
-⌘]          — Avançar
-⌘1-9        — Navegação entre módulos
-J/K         — Navegação em listas (vim-style)
-Enter       — Abrir item selecionado
+J/K         — Navegação em listas
+Enter       — Abrir / confirmar
 E           — Edição rápida
 D           — Definir data
 P           — Definir prioridade
 Escape      — Fechar / cancelar
+⌘1-9        — Navegação entre módulos
 ```
-
-### Hover States
-
-- Ações secundárias (editar, deletar, mover) aparecem no hover da linha
-- Nunca mostrar mais de 3 ações no hover
-- Sempre incluir opção "Mais ações" (três pontos) para o resto
-
-### Empty States
-
-Todo estado vazio deve ter:
-- Ícone contextual (suave, 40px)
-- Título curto e encorajador
-- Subtítulo explicativo (1 linha)
-- CTA opcional
 
 ---
 
 ## RESPONSIVIDADE
 
 ```
-Mobile:   < 768px   — navegação em bottom bar, sidebar oculta
-Tablet:   768-1024px — sidebar colapsada por padrão
+Mobile:   < 768px   — bottom nav, sidebar oculta, margem 16px
+Tablet:   768-1024px — sidebar colapsada
 Desktop:  > 1024px  — sidebar expandida, layout completo
-Wide:     > 1440px  — max-width no conteúdo central
+Wide:     > 1440px  — max-width centralizado
 ```
-
-### Mobile — prioridades
-- Bottom navigation com 5 itens principais
-- Swipe gestures em listas
-- FAB (Floating Action Button) para capture rápido
-- Sheets em vez de modais
-- Touch targets mínimo 44px
 
 ---
 
 ## ACESSIBILIDADE
 
-- Contraste mínimo AA (4.5:1 para texto normal, 3:1 para texto grande)
-- Focus visible em todos os elementos interativos
+- Contraste mínimo AA (4.5:1 para texto normal)
+- Focus visible em todos os interativos — ring Apex Red `rgba(220,38,38,0.5)`
 - ARIA labels em ícones sem texto
-- Navegação por teclado completa
-- `prefers-reduced-motion` respeitar para animações
+- `prefers-reduced-motion` → desligar todas as animações
 
 ---
 
-*Versão: 1.0 | Criado: 2026-06-26*
+## ANTI-PATTERNS — NUNCA FAZER
+
+- Bordas pill-shape em botões ou inputs
+- `box-shadow` clássico (usar tonal layering)
+- Light mode como experiência principal
+- Mais de 2 famílias tipográficas na mesma tela
+- Apex Red em elementos decorativos que não são interativos
+- Animações longas que atrasam ações
+
+---
+
+*Sistema: Apex Velocity | Versão: 1.0 | Criado: 2026-06-26*
