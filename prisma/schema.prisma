@@ -1,0 +1,398 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// CORE
+// ============================================================
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  avatarUrl   String?
+  timezone    String    @default("America/Sao_Paulo")
+  locale      String    @default("pt-BR")
+  onboardedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  memberships WorkspaceMember[]
+  sessions    Session[]
+  accounts    Account[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+model Workspace {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  logoUrl     String?
+  plan        Plan      @default(FREE)
+  trialEndsAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  members     WorkspaceMember[]
+  tasks       Task[]
+  projects    Project[]
+  notes       Note[]
+  habits      Habit[]
+  goals       Goal[]
+  aiMemories  AiMemory[]
+
+  @@index([slug])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+enum Plan {
+  FREE
+  PRO
+  TEAM
+  ENTERPRISE
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+// ============================================================
+// TASKS
+// ============================================================
+
+model Task {
+  id          String     @id @default(cuid())
+  workspaceId String
+  createdById String
+  assigneeId  String?
+  projectId   String?
+  parentId    String?
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(NONE)
+  dueDate     DateTime?
+  scheduledAt DateTime?
+  completedAt DateTime?
+  deletedAt   DateTime?
+  sortOrder   Float      @default(0)
+  tags        String[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project?   @relation(fields: [projectId], references: [id])
+  parent      Task?      @relation("subtasks", fields: [parentId], references: [id])
+  subtasks    Task[]     @relation("subtasks")
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, dueDate])
+  @@index([workspaceId, assigneeId])
+  @@index([projectId])
+  @@index([parentId])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  INBOX
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  CANCELLED
+}
+
+enum Priority {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ============================================================
+// PROJECTS
+// ============================================================
+
+model Project {
+  id          String        @id @default(cuid())
+  workspaceId String
+  createdById String
+  name        String
+  description String?
+  color       String?
+  icon        String?
+  status      ProjectStatus @default(ACTIVE)
+  startDate   DateTime?
+  targetDate  DateTime?
+  completedAt DateTime?
+  deletedAt   DateTime?
+  sortOrder   Float         @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+
+  @@index([workspaceId, status])
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================================
+// NOTES
+// ============================================================
+
+model Note {
+  id          String    @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String?
+  content     String
+  isPinned    Boolean   @default(false)
+  tags        String[]
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, createdById])
+  @@map("notes")
+}
+
+// ============================================================
+// HABITS
+// ============================================================
+
+model Habit {
+  id          String         @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String
+  description String?
+  icon        String?
+  color       String?
+  frequency   HabitFrequency @default(DAILY)
+  targetCount Int            @default(1)
+  deletedAt   DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  logs        HabitLog[]
+
+  @@index([workspaceId, createdById])
+  @@map("habits")
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  date      DateTime @db.Date
+  count     Int      @default(1)
+  note      String?
+  createdAt DateTime @default(now())
+
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@map("habit_logs")
+}
+
+enum HabitFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// ============================================================
+// GOALS
+// ============================================================
+
+model Goal {
+  id          String     @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String
+  description String?
+  status      GoalStatus @default(ACTIVE)
+  targetDate  DateTime?
+  targetValue Float?
+  currentValue Float?
+  unit        String?
+  completedAt DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdById])
+  @@map("goals")
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+  PAUSED
+}
+
+// ============================================================
+// AI
+// ============================================================
+
+model AiMemory {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  content     String
+  category    String
+  importance  Int       @default(5)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, userId])
+  @@map("ai_memories")
+}
+
+model AiConversation {
+  id          String      @id @default(cuid())
+  workspaceId String
+  userId      String
+  context     String?
+  createdAt   DateTime    @default(now())
+
+  messages    AiMessage[]
+
+  @@index([workspaceId, userId])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  role           AiRole
+  content        String
+  createdAt      DateTime       @default(now())
+
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+enum AiRole {
+  USER
+  ASSISTANT
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  type        String
+  title       String
+  body        String?
+  data        Json?
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, userId, readAt])
+  @@map("notifications")
+}

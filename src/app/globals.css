@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+:root {
+  --background: #0e0e0e;
+  --foreground: #e5e2e1;
+  --surface: #131313;
+  --surface-low: #1c1b1b;
+  --surface-base: #201f1f;
+  --surface-high: #2a2a2a;
+  --border: #2a2a2a;
+  --border-subtle: #1f1f1f;
+  --primary: #dc2626;
+  --primary-foreground: #ffffff;
+  --outline: #ac8884;
+  --outline-variant: #5c403c;
+  --radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+::selection {
+  background: rgba(220, 38, 38, 0.25);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px #dc2626;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #353534; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #5c403c; }
+
+/* Apex Velocity glass */
+.glass {
+  background: rgba(28, 27, 27, 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Nav active indicator */
+.nav-active {
+  background: #2a2a2a;
+  color: #e5e2e1;
+  position: relative;
+}
+.nav-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 2px;
+  background: #dc2626;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Mono label */
+.label-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--outline);
+}
