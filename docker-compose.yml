@@ -32,6 +32,25 @@ services:
       timeout: 3s
       retries: 5
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lifeos-app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/lifeos
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
