@@ -1,0 +1,9 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "claude/personal-app-dev-edokti": true
+    }
+  },
+  "buildCommand": "prisma generate && next build",
+  "framework": "nextjs"
+}
