@@ -511,4 +511,540 @@ Wide:     > 1440px  — max-width centralizado
 
 ---
 
-*Sistema: Apex Velocity | Versão: 1.0 | Criado: 2026-06-26*
+---
+
+## ESTADOS DE UI
+
+### Loading — Spinner
+
+```css
+/* Usar apenas em ações pontuais (submit de form, delete) */
+/* Nunca em carregamento de página inteira */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--outline-variant);
+  border-top-color: #dc2626;
+  border-radius: 9999px;
+  animation: spin 600ms linear infinite;
+}
+```
+
+Regra: botão em loading → substituir label por spinner + desabilitar. Nunca mostrar spinner flutuante genérico.
+
+### Skeleton
+
+```
+Cor base:    var(--surface-container-high)   #2a2a2a
+Cor shimmer: var(--surface-bright)           #3a3939
+Animação:    shimmer 1.4s ease infinite (gradiente horizontal)
+Border radius: mesmo do elemento real
+```
+
+Regras:
+- Skeleton deve ter exatamente o mesmo layout do conteúdo real (mesmas alturas, larguras, gaps)
+- Nunca mostrar skeleton por mais de 3s — se demorar, mostrar Error State
+- Não animar skeleton em `prefers-reduced-motion`
+
+```tsx
+// Padrões de altura
+linha de texto:   h-4  (16px)
+título:           h-6  (24px)
+card pequeno:     h-16 (64px)
+card normal:      h-24 (96px)
+avatar:           h-8 w-8 rounded-full
+```
+
+### Empty State
+
+Estrutura obrigatória: ícone → título → descrição → ação primária (opcional)
+
+```
+ícone:      Lucide, 32px, cor --on-surface-variant
+título:     Geist 500, 15px, --on-surface
+descrição:  Geist 400, 13px, --on-surface-variant, max 2 linhas
+ação:       Button secondary sm (quando aplicável)
+```
+
+Exemplos por módulo:
+```
+Tarefas vazias:   "Nenhuma tarefa"          → "Tudo limpo por hoje."
+                                              → [+ Nova tarefa]
+Notas vazias:     "Nenhuma nota"            → "Capture seus pensamentos."
+                                              → [+ Nova nota]
+Busca sem result: "Sem resultados para X"  → "Tente um termo diferente."
+```
+
+Regra: Empty state deve ser motivador, nunca deprimente. Tom de controle, não de falha.
+
+### Error State
+
+```
+Estrutura: ícone AlertCircle (vermelho) → título → descrição técnica → ação de retry
+Cor:       --error (#ffb4ab) para ícone, --on-surface para texto
+```
+
+```tsx
+// Componente padrão
+<ErrorState
+  title="Não foi possível carregar"
+  description="Erro ao conectar com o servidor."
+  onRetry={() => refetch()}
+/>
+```
+
+Regra: nunca mostrar stack trace ao usuário. Log interno, mensagem simples para o usuário.
+
+### Offline State
+
+```
+Banner fixo no topo: altura 36px, fundo #1c1b1b, borda bottom 1px #dc2626
+Ícone WifiOff 14px + texto "Sem conexão — trabalhando offline"
+Desaparecer com slide-up quando conexão voltar
+```
+
+---
+
+## PADRÕES DE PÁGINA
+
+### Dashboard
+
+```
+Layout: grid 12 colunas
+Header: título da página (h1) + ações primárias (direita) — height 56px
+Widgets: 3 tamanhos — sm (3 col), md (6 col), lg (12 col)
+Gap entre widgets: 16px
+Padding do container: 24px 32px (desktop), 16px (mobile)
+```
+
+Ordem de prioridade visual de cima para baixo:
+1. KPIs / números principais (sm widgets na primeira linha)
+2. Lista de foco principal (md ou lg)
+3. Conteúdo secundário (md widgets)
+4. Atividade recente (lg, última linha)
+
+### Tabela
+
+```
+Header: sticky top, fundo --surface-container-low, borda bottom
+Linha:  height 44px, hover fundo --surface-container
+Seleção: checkbox esquerda, fundo --surface-container-high quando selecionada
+Paginação: cursor-based, "Mostrar mais" ou navegação numérica — nunca offset puro
+Colunas: mínimo de largura, sem truncar texto importante
+Coluna de ações: direita, visível apenas no hover da linha
+```
+
+### Kanban
+
+```
+Coluna: width 280px, fundo --surface-container-low, border-radius lg
+Header da coluna: status chip + contador de cards + botão "+"
+Card: fundo --surface-container, border 1px --outline-variant
+      hover: border --outline
+      dragging: opacity 0.5, shadow level 2
+Gap entre colunas: 12px
+Gap entre cards: 8px
+Scroll: cada coluna scroll independente, overflow-y auto
+```
+
+### Formulário
+
+```
+Layout: max-width 560px, centralizado ou em drawer
+Seções: agrupadas com título de seção (label-sm uppercase)
+Gap entre campos: 20px
+Gap entre seções: 32px
+Ações: sempre no final, alinhadas à direita — [Cancelar ghost] [Confirmar primary]
+Validação: inline, abaixo do campo, font 12px, cor --error
+```
+
+Regras:
+- Nunca abrir formulário em página nova se couber em modal ou drawer
+- Campos obrigatórios: asterisco vermelho após o label, nunca "* obrigatório" no rodapé
+- Autofocus no primeiro campo sempre
+
+### Detalhes (item aberto)
+
+```
+Layout: 2 colunas — conteúdo principal (flex-1) + sidebar de metadados (280px)
+Header: título editável inline (click to edit) + breadcrumb + ações
+Sidebar de metadados: status, prioridade, data, projeto, assignee, tags
+Seção de conteúdo: rich text ou descrição + subtarefas/subitens
+Seção de atividade: comentários e histórico de mudanças (colapsável)
+```
+
+### Configurações
+
+```
+Layout: sidebar de navegação (200px) + conteúdo (flex-1)
+Sidebar: grupos de seções com labels uppercase, items com ícone 16px
+Seções de conteúdo: título h2 + descrição + cards de configuração
+Cards de configuração: label + descrição curta + controle (toggle, select, input) — tudo na mesma linha
+Ação de salvar: auto-save com feedback toast OU botão "Salvar" sticky no bottom
+```
+
+---
+
+## DASHBOARD — WIDGETS
+
+### Tamanhos de Widget
+
+| Tamanho | Colunas | Uso |
+|---|---|---|
+| sm | 3 col (25%) | KPI único: número + label + delta |
+| md | 6 col (50%) | Lista curta, gráfico simples |
+| lg | 12 col (100%) | Tabela, lista principal, gráfico completo |
+
+### KPI Card (sm widget)
+
+```
+Estrutura:
+  label:  JetBrains Mono 11px uppercase, --on-surface-variant
+  valor:  Geist 700 28px, --on-surface
+  delta:  12px, verde (#4ade80) se positivo, vermelho (#f87171) se negativo
+          acompanha ícone TrendingUp / TrendingDown 12px
+
+Background: --surface-container
+Border:     1px --outline-variant
+Padding:    16px
+```
+
+### Indicadores de Progresso
+
+```css
+/* Barra linear */
+height: 4px;
+background: var(--surface-container-high);
+border-radius: 9999px;
+
+/* Fill */
+background: #dc2626; /* Apex Red para progresso principal */
+background: #4ade80; /* Verde para metas/hábitos */
+transition: width 300ms ease;
+```
+
+```css
+/* Circular (hábitos, objetivos) */
+/* SVG stroke-dasharray / stroke-dashoffset */
+stroke: #dc2626;
+stroke-width: 3;
+stroke-linecap: round;
+```
+
+---
+
+## COMPONENT INVENTORY POR MÓDULO
+
+### Core / Global
+```
+CommandBar, Sidebar, TopBar, UserAvatar, WorkspaceSwitcher,
+NotificationBell, KeyboardShortcutHint, Breadcrumb,
+ThemeProvider, ToastProvider, ModalProvider
+```
+
+### Dashboard Hoje
+```
+DayProgressBar, TaskListWidget, QuickCaptureInput,
+EventTimelineWidget, HabitCheckWidget, KpiCard,
+FocusModeToggle, GreetingHeader
+```
+
+### Tarefas
+```
+TaskList, TaskItem, TaskForm, TaskFilters, TaskBulkActions,
+TaskStatusBadge, PriorityBadge, DueDatePicker,
+SubtaskList, SubtaskItem, TaskDetailPanel,
+TaskGroupHeader, TaskEmptyState, TaskSearchBar
+```
+
+### Projetos
+```
+ProjectList, ProjectCard, ProjectForm, ProjectHeader,
+MilestoneList, MilestoneItem, ProjectProgressBar,
+ProjectTaskList, ProjectEmptyState
+```
+
+### Agenda
+```
+CalendarView, DayView, WeekView, MonthView,
+EventCard, EventForm, EventDetailPanel,
+TimeGrid, AgendaList, RecurrenceSelector
+```
+
+### Notas
+```
+NoteList, NoteCard, NoteEditor (Tiptap wrapper),
+NoteForm, TagInput, TagBadge, NoteSearchBar,
+NoteDetailPanel, PinnedNotes, NoteEmptyState
+```
+
+### Hábitos
+```
+HabitList, HabitCard, HabitForm, HabitCheckButton,
+HabitStreakBadge, HabitHeatmap, HabitStats,
+DailyCheckinPanel, HabitEmptyState
+```
+
+### Finanças
+```
+AccountList, AccountCard, TransactionList, TransactionItem,
+TransactionForm, CategoryBadge, FinanceDashboard,
+BalanceCard, SpendingChart, BudgetProgressBar
+```
+
+### IA
+```
+AiChatPanel, AiMessageBubble, AiInputBar, AiStreamingCursor,
+AiContextBadge, AiMemoryList, AiMemoryCard,
+AiSuggestionChip, AiLoadingState
+```
+
+### Shared / Primitivos
+```
+Button, Input, Textarea, Select, Checkbox, Toggle, RadioGroup,
+DatePicker, TimePicker, DateRangePicker,
+Modal, Drawer, Popover, Dropdown, Tooltip, Toast,
+Table, TableHeader, TableRow, TableCell,
+Tabs, TabsList, TabsTrigger, TabsContent,
+Card, CardHeader, CardContent, CardFooter,
+Badge, Chip, Avatar, Spinner, Skeleton,
+EmptyState, ErrorState, OfflineBanner,
+RichTextEditor, FileUpload, ColorPicker, IconPicker
+```
+
+---
+
+## REGRAS DE CONSISTÊNCIA
+
+### Quando usar Modal
+- Ações destrutivas (confirmar delete)
+- Formulários curtos (até 5 campos) sem contexto de navegação
+- Visualização rápida de item sem sair da página atual
+- Máximo: largura 560px, nunca full-screen em desktop
+
+### Quando usar Drawer (Sheet)
+- Formulários médios (6-12 campos)
+- Detalhes de item com contexto rico (tarefa, nota, projeto)
+- Configurações de filtro/view em mobile
+- Painéis de IA contextual
+- Sempre desliza da direita em desktop, de baixo em mobile
+
+### Quando usar Tabela
+- Listas com 5+ colunas de dados
+- Quando comparação entre linhas é importante
+- Relatórios financeiros, logs, histórico
+- Nunca para listas simples de 1-2 atributos — usar lista estilizada
+
+### Quando usar Cards
+- Projetos, hábitos, contas financeiras (entidades "ricas" com preview)
+- Grid de visualização quando espaço horizontal permite
+- Dashboard widgets
+- Nunca para tarefas simples (usar lista densa, não cards)
+
+### Quando usar Navegação Lateral (Sidebar)
+- Módulos principais da aplicação — sempre na sidebar
+- Sub-navegação dentro de um módulo (ex: configurações) — sidebar secundária 200px
+- Nunca usar tabs horizontais para navegação entre módulos
+
+### Quando usar Command Bar (⌘K)
+- Criar qualquer item rápido sem contexto de navegação
+- Busca global entre todos os módulos
+- Ações rápidas em item selecionado (mudar status, prioridade, data)
+- Navegar entre módulos
+- Nunca duplicar ação que já está a 1 clique visível na tela
+
+### Quando usar Popover vs Tooltip
+- **Tooltip:** informação estática, aparece em hover, desaparece ao mover, sem interação
+- **Popover:** tem conteúdo interativo (seletor de data, seletor de prioridade, mini-formulário)
+
+### Quando usar Toast vs Banner
+- **Toast:** feedback de ação concluída (criou, atualizou, deletou) — 3s, canto inferior direito
+- **Banner:** estado persistente que precisa de atenção (offline, erro de sync, aviso de plano) — topo da página
+
+---
+
+## DESIGN TOKENS COMPLETOS
+
+```json
+{
+  "color": {
+    "background": "#131313",
+    "surface": {
+      "dim": "#131313",
+      "DEFAULT": "#131313",
+      "bright": "#3a3939",
+      "lowest": "#0e0e0e",
+      "low": "#1c1b1b",
+      "base": "#201f1f",
+      "high": "#2a2a2a",
+      "highest": "#353534"
+    },
+    "on-surface": "#e5e2e1",
+    "on-surface-variant": "#e6bdb8",
+    "outline": "#ac8884",
+    "outline-variant": "#5c403c",
+    "primary": "#dc2626",
+    "primary-text": "#ffb4ab",
+    "secondary": "#c8c6c5",
+    "error": "#ffb4ab",
+    "success": "#4ade80",
+    "warning": "#fbbf24",
+    "info": "#60a5fa"
+  },
+  "spacing": {
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px",
+    "16": "64px"
+  },
+  "radius": {
+    "sm": "2px",
+    "DEFAULT": "4px",
+    "md": "6px",
+    "lg": "8px",
+    "xl": "12px",
+    "full": "9999px"
+  },
+  "shadow": {
+    "card": "none (tonal layering)",
+    "modal": "0 0 0 1px rgba(220,38,38,0.15), 0 24px 48px rgba(0,0,0,0.7)",
+    "dropdown": "0 0 0 1px rgba(220,38,38,0.10), 0 8px 24px rgba(0,0,0,0.5)",
+    "hover-glow": "0 0 0 1px rgba(220,38,38,0.15), 0 0 24px rgba(220,38,38,0.08)"
+  },
+  "font": {
+    "sans": "Geist, system-ui, sans-serif",
+    "mono": "JetBrains Mono, monospace",
+    "size": {
+      "xs":   "11px",
+      "sm":   "12px",
+      "base": "14px",
+      "md":   "15px",
+      "lg":   "16px",
+      "xl":   "20px",
+      "2xl":  "24px",
+      "3xl":  "32px",
+      "4xl":  "48px"
+    },
+    "weight": {
+      "normal": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    }
+  },
+  "animation": {
+    "fast":   "100ms ease",
+    "base":   "150ms ease",
+    "slow":   "200ms ease",
+    "modal":  "200ms ease + translateY(4px → 0)",
+    "sidebar":"200ms ease"
+  },
+  "z-index": {
+    "base":     0,
+    "raised":   10,
+    "dropdown": 100,
+    "sticky":   200,
+    "modal":    300,
+    "toast":    400,
+    "command":  500
+  },
+  "layout": {
+    "sidebar-expanded":  "240px",
+    "sidebar-collapsed": "56px",
+    "content-max-width": "1280px",
+    "widget-sm":         "25%",
+    "widget-md":         "50%",
+    "widget-lg":         "100%",
+    "modal-max-width":   "560px",
+    "drawer-width":      "480px",
+    "detail-sidebar":    "280px"
+  }
+}
+```
+
+---
+
+## ACESSIBILIDADE — GUIA COMPLETO
+
+### Contraste
+- Texto normal (< 18px): mínimo **4.5:1** (WCAG AA)
+- Texto grande (≥ 18px bold): mínimo **3:1**
+- `--on-surface` (#e5e2e1) sobre `--background` (#131313): **contraste ~11:1** ✅
+- `--on-surface-variant` (#e6bdb8) sobre `--surface-container` (#201f1f): verificar por uso
+
+### Focus
+```css
+/* Padrão global — nunca remover outline sem substituir */
+:focus-visible {
+  outline: 2px solid rgba(220, 38, 38, 0.6);
+  outline-offset: 2px;
+  border-radius: var(--radius-DEFAULT);
+}
+```
+
+### Motion
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Semântica
+- Usar elementos HTML semânticos (`<nav>`, `<main>`, `<aside>`, `<button>`, `<h1-h6>`)
+- `aria-label` em todos os ícones sem texto visível
+- `aria-live="polite"` em toasts e atualizações dinâmicas
+- `aria-expanded` em sidebar, accordions, dropdowns
+- `role="dialog"` + `aria-modal="true"` em modais
+- Ordem de tab lógica — nunca usar `tabindex > 0`
+
+---
+
+## PERFORMANCE DE UI
+
+### Regras de Renderização
+- Server Components por padrão — `'use client'` apenas quando necessário (interatividade, hooks de browser)
+- Virtualizar listas com mais de 50 itens (`@tanstack/react-virtual`)
+- Imagens: sempre `next/image` com `sizes` definido
+- Fontes: `next/font` com `display: swap`, subsets apenas pt e latin
+
+### Percepção de Velocidade
+- Optimistic updates em todas as mutações (criar, completar, deletar)
+- Skeleton imediato — nunca tela em branco esperando dados
+- Prefetch de rotas em hover no nav da sidebar (`prefetch={true}`)
+- Debounce de 300ms em buscas, 150ms em filtros
+
+### Bundle
+- Componentes pesados (editor rich-text, calendário, charts) sempre com `dynamic(() => import(...), { ssr: false })`
+- Não importar bibliotecas inteiras: `import { format } from 'date-fns'` nunca `import * as dateFns`
+
+---
+
+## SUGESTÕES FUTURAS DE EVOLUÇÃO DO DESIGN
+
+### Curto prazo (pós-MVP)
+1. **Temas por módulo** — cada módulo com accent color própria aplicada sutil no header (agenda laranja, finanças azul)
+2. **Densidade configurável** — "Compact" / "Normal" / "Relaxed" no perfil do usuário, ajusta line-height e padding de listas
+3. **Modo Foco** — interface stripped, remove sidebar, mostra apenas 1 tarefa por vez
+
+### Médio prazo
+4. **Customização de sidebar** — usuário reordena módulos via drag, oculta os que não usa
+5. **Wallpaper/Background do Dashboard** — imagem sutil ou gradiente personalizado no canvas raiz
+6. **Animações de transição entre rotas** — View Transitions API quando suporte for amplo
+
+### Longo prazo
+7. **Light mode premium** — não é inversão do dark, é tema próprio com mesma linguagem visual
+8. **Design adaptativo por contexto** — modo "planejamento" (mais espaço, menos densidade) vs modo "execução" (denso, rápido)
+9. **Componentes de dados em 3D** — gráficos de progresso com profundidade leve para dashboard executivo
+
+---
+
+*Sistema: Apex Velocity | Versão: 2.0 | Atualizado: 2026-06-27*
