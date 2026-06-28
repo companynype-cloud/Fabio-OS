@@ -40,7 +40,7 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
@@ -62,7 +62,7 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
   @@map("accounts")
@@ -91,13 +91,32 @@ model Workspace {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  members     WorkspaceMember[]
-  tasks       Task[]
-  projects    Project[]
-  notes       Note[]
-  habits      Habit[]
-  goals       Goal[]
-  aiMemories  AiMemory[]
+  members          WorkspaceMember[]
+  tasks            Task[]
+  projects         Project[]
+  notes            Note[]
+  habits           Habit[]
+  goals            Goal[]
+  aiMemories       AiMemory[]
+  notifications    Notification[]
+  calendarEvents   CalendarEvent[]
+  meetings         Meeting[]
+  ideas            Idea[]
+  journalEntries   JournalEntry[]
+  healthMetrics    HealthMetric[]
+  workouts         Workout[]
+  financialAccounts FinancialAccount[]
+  transactions     Transaction[]
+  categories       Category[]
+  investments      Investment[]
+  keyResults       KeyResult[]
+  documents        Document[]
+  integrations     Integration[]
+  whatsappChats    WhatsAppChat[]
+  whatsappMessages WhatsAppMessage[]
+  emails           Email[]
+  automations      Automation[]
+  aiInsights       AIInsight[]
 
   @@index([slug])
   @@map("workspaces")
@@ -110,8 +129,8 @@ model WorkspaceMember {
   role        WorkspaceRole @default(MEMBER)
   joinedAt    DateTime      @default(now())
 
-  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
   @@index([workspaceId])
@@ -157,10 +176,11 @@ model Task {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  project     Project?   @relation(fields: [projectId], references: [id])
-  parent      Task?      @relation("subtasks", fields: [parentId], references: [id])
-  subtasks    Task[]     @relation("subtasks")
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project        Project?        @relation(fields: [projectId], references: [id])
+  parent         Task?           @relation("subtasks", fields: [parentId], references: [id])
+  subtasks       Task[]          @relation("subtasks")
+  calendarEvents CalendarEvent[]
 
   @@index([workspaceId, status])
   @@index([workspaceId, dueDate])
@@ -208,8 +228,9 @@ model Project {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  tasks       Task[]
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+  ideas     Idea[]
 
   @@index([workspaceId, status])
   @@map("projects")
@@ -223,7 +244,92 @@ enum ProjectStatus {
 }
 
 // ============================================================
-// NOTES
+// CALENDAR & MEETINGS
+// ============================================================
+
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime
+  allDay      Boolean   @default(false)
+  location    String?
+  color       String?
+  isRecurring Boolean   @default(false)
+  rrule       String?
+  meetingId   String?
+  taskId      String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  meeting   Meeting?  @relation(fields: [meetingId], references: [id])
+  task      Task?     @relation(fields: [taskId], references: [id])
+
+  @@index([workspaceId, startAt])
+  @@index([workspaceId, createdById])
+  @@map("calendar_events")
+}
+
+model Meeting {
+  id          String        @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String
+  agenda      String?
+  notes       String?
+  summary     String?
+  status      MeetingStatus @default(SCHEDULED)
+  startAt     DateTime
+  endAt       DateTime?
+  location    String?
+  videoUrl    String?
+  deletedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  events    CalendarEvent[]
+  attendees MeetingAttendee[]
+
+  @@index([workspaceId, startAt])
+  @@map("meetings")
+}
+
+model MeetingAttendee {
+  id        String         @id @default(cuid())
+  meetingId String
+  userId    String?
+  email     String
+  name      String?
+  status    AttendeeStatus @default(PENDING)
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@map("meeting_attendees")
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AttendeeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  MAYBE
+}
+
+// ============================================================
+// NOTES & IDEAS & DOCUMENTS
 // ============================================================
 
 model Note {
@@ -238,11 +344,62 @@ model Note {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
   @@index([workspaceId, createdById])
   @@map("notes")
+}
+
+model Idea {
+  id          String     @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String
+  content     String?
+  status      IdeaStatus @default(INBOX)
+  energy      Int?
+  tags        String[]
+  projectId   String?
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?  @relation(fields: [projectId], references: [id])
+
+  @@index([workspaceId, createdById])
+  @@map("ideas")
+}
+
+enum IdeaStatus {
+  INBOX
+  DEVELOPING
+  CONVERTED
+  ARCHIVED
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  workspaceId String
+  createdById String
+  title       String
+  content     String?
+  type        String    @default("document")
+  icon        String?
+  parentId    String?
+  tags        String[]
+  isPinned    Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent    Document?  @relation("subdocuments", fields: [parentId], references: [id])
+  children  Document[] @relation("subdocuments")
+
+  @@index([workspaceId])
+  @@map("documents")
 }
 
 // ============================================================
@@ -263,8 +420,8 @@ model Habit {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
-  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  logs        HabitLog[]
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  logs      HabitLog[]
 
   @@index([workspaceId, createdById])
   @@map("habits")
@@ -278,7 +435,7 @@ model HabitLog {
   note      String?
   createdAt DateTime @default(now())
 
-  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
   @@unique([habitId, date])
   @@index([habitId])
@@ -292,29 +449,133 @@ enum HabitFrequency {
 }
 
 // ============================================================
-// GOALS
+// PERSONAL — JOURNAL & HEALTH
+// ============================================================
+
+model JournalEntry {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  date        DateTime  @db.Date
+  content     String
+  mood        Int?
+  energy      Int?
+  gratitude   String?
+  intentions  String?
+  reflection  String?
+  tags        String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId, date])
+  @@index([workspaceId, userId])
+  @@map("journal_entries")
+}
+
+model HealthMetric {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  type        String
+  value       Float
+  unit        String
+  date        DateTime
+  notes       String?
+  source      String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, userId, type])
+  @@map("health_metrics")
+}
+
+model Workout {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  name        String
+  type        String
+  duration    Int?
+  calories    Int?
+  date        DateTime
+  notes       String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  exercises WorkoutExercise[]
+
+  @@index([workspaceId, userId])
+  @@map("workouts")
+}
+
+model WorkoutExercise {
+  id        String  @id @default(cuid())
+  workoutId String
+  name      String
+  sets      Int?
+  reps      Int?
+  weight    Float?
+  duration  Int?
+  distance  Float?
+  notes     String?
+  order     Int     @default(0)
+
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@index([workoutId])
+  @@map("workout_exercises")
+}
+
+// ============================================================
+// GOALS & KEY RESULTS
 // ============================================================
 
 model Goal {
-  id          String     @id @default(cuid())
-  workspaceId String
-  createdById String
-  title       String
-  description String?
-  status      GoalStatus @default(ACTIVE)
-  targetDate  DateTime?
-  targetValue Float?
+  id           String     @id @default(cuid())
+  workspaceId  String
+  createdById  String
+  title        String
+  description  String?
+  status       GoalStatus @default(ACTIVE)
+  targetDate   DateTime?
+  targetValue  Float?
   currentValue Float?
-  unit        String?
-  completedAt DateTime?
-  deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  unit         String?
+  completedAt  DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  keyResults KeyResult[]
 
   @@index([workspaceId, createdById])
   @@map("goals")
+}
+
+model KeyResult {
+  id           String    @id @default(cuid())
+  goalId       String
+  workspaceId  String
+  title        String
+  targetValue  Float
+  currentValue Float     @default(0)
+  unit         String?
+  dueDate      DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  goal      Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@map("key_results")
 }
 
 enum GoalStatus {
@@ -322,6 +583,261 @@ enum GoalStatus {
   COMPLETED
   ABANDONED
   PAUSED
+}
+
+// ============================================================
+// FINANCE
+// ============================================================
+
+model FinancialAccount {
+  id          String      @id @default(cuid())
+  workspaceId String
+  name        String
+  type        AccountType
+  balance     Float       @default(0)
+  currency    String      @default("BRL")
+  institution String?
+  color       String?
+  icon        String?
+  isActive    Boolean     @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([workspaceId])
+  @@map("financial_accounts")
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  workspaceId String
+  accountId   String
+  categoryId  String?
+  title       String
+  amount      Float
+  type        TransactionType
+  date        DateTime
+  notes       String?
+  tags        String[]
+  isRecurring Boolean         @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account   FinancialAccount @relation(fields: [accountId], references: [id])
+  category  Category?        @relation(fields: [categoryId], references: [id])
+
+  @@index([workspaceId, date])
+  @@index([accountId])
+  @@map("transactions")
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  workspaceId String
+  name        String
+  type        TransactionType
+  color       String?
+  icon        String?
+  parentId    String?
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent        Category?     @relation("subcategories", fields: [parentId], references: [id])
+  subcategories Category[]    @relation("subcategories")
+  transactions  Transaction[]
+
+  @@index([workspaceId])
+  @@map("categories")
+}
+
+model Investment {
+  id           String         @id @default(cuid())
+  workspaceId  String
+  name         String
+  type         InvestmentType
+  ticker       String?
+  quantity     Float?
+  avgPrice     Float?
+  currentPrice Float?
+  currency     String         @default("BRL")
+  institution  String?
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("investments")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT_CARD
+  INVESTMENT
+  CASH
+  OTHER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum InvestmentType {
+  STOCKS
+  BONDS
+  CRYPTO
+  REAL_ESTATE
+  FUND
+  OTHER
+}
+
+// ============================================================
+// INTEGRATIONS & COMMUNICATION
+// ============================================================
+
+model Integration {
+  id          String            @id @default(cuid())
+  workspaceId String
+  type        String
+  name        String
+  status      IntegrationStatus @default(INACTIVE)
+  config      Json?
+  lastSyncAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, type])
+  @@map("integrations")
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  SYNCING
+}
+
+model WhatsAppChat {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  chatId        String
+  name          String
+  type          String    @default("individual")
+  avatarUrl     String?
+  lastMessage   String?
+  lastMessageAt DateTime?
+  isArchived    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  messages  WhatsAppMessage[]
+
+  @@unique([workspaceId, chatId])
+  @@map("whatsapp_chats")
+}
+
+model WhatsAppMessage {
+  id          String   @id @default(cuid())
+  workspaceId String
+  chatId      String
+  messageId   String
+  fromMe      Boolean  @default(false)
+  senderName  String?
+  body        String?
+  type        String   @default("text")
+  mediaUrl    String?
+  timestamp   DateTime
+  isRead      Boolean  @default(false)
+  taskId      String?
+  ideaId      String?
+  noteId      String?
+  createdAt   DateTime @default(now())
+
+  chat      WhatsAppChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, messageId])
+  @@index([chatId, timestamp])
+  @@map("whatsapp_messages")
+}
+
+model Email {
+  id          String   @id @default(cuid())
+  workspaceId String
+  messageId   String
+  threadId    String?
+  from        String
+  to          String[]
+  cc          String[]
+  subject     String
+  body        String?
+  snippet     String?
+  isRead      Boolean  @default(false)
+  isStarred   Boolean  @default(false)
+  labels      String[]
+  receivedAt  DateTime
+  taskId      String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, messageId])
+  @@index([workspaceId, receivedAt])
+  @@map("emails")
+}
+
+// ============================================================
+// AUTOMATIONS
+// ============================================================
+
+model Automation {
+  id          String    @id @default(cuid())
+  workspaceId String
+  createdById String
+  name        String
+  description String?
+  trigger     Json
+  actions     Json
+  isActive    Boolean   @default(true)
+  lastRunAt   DateTime?
+  runCount    Int       @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  logs      AutomationLog[]
+
+  @@index([workspaceId])
+  @@map("automations")
+}
+
+model AutomationLog {
+  id           String   @id @default(cuid())
+  automationId String
+  workspaceId  String
+  status       String
+  input        Json?
+  output       Json?
+  error        String?
+  duration     Int?
+  createdAt    DateTime @default(now())
+
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId])
+  @@map("automation_logs")
 }
 
 // ============================================================
@@ -339,36 +855,54 @@ model AiMemory {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, userId])
   @@map("ai_memories")
 }
 
 model AiConversation {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   workspaceId String
   userId      String
   context     String?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime @default(now())
 
-  messages    AiMessage[]
+  messages AiMessage[]
 
   @@index([workspaceId, userId])
   @@map("ai_conversations")
 }
 
 model AiMessage {
-  id             String         @id @default(cuid())
+  id             String   @id @default(cuid())
   conversationId String
   role           AiRole
   content        String
-  createdAt      DateTime       @default(now())
+  createdAt      DateTime @default(now())
 
-  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
   @@map("ai_messages")
+}
+
+model AIInsight {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  type        String
+  title       String
+  content     String
+  data        Json?
+  isRead      Boolean   @default(false)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, userId, createdAt])
+  @@map("ai_insights")
 }
 
 enum AiRole {
@@ -390,6 +924,8 @@ model Notification {
   data        Json?
   readAt      DateTime?
   createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, userId, readAt])
   @@map("notifications")
